@@ -5,7 +5,7 @@ import pandas as pd
 from sklearn.cross_validation import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import VarianceThreshold
-from sklearn.metrics import roc_curve, roc_auc_score, average_precision_score
+from sklearn.metrics import roc_curve, roc_auc_score
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import RobustScaler, StandardScaler
 
@@ -105,7 +105,7 @@ if __name__ == '__main__':
     metrics = ['idfree', 'idbased', 'instrument']
     for instrument in instruments:
         quality = pd.read_csv('data/{}-quality.txt'.format(instrument), '\t', index_col='Filename')
-        predictions = []
+        predictions_proba = []
         for metric in metrics:
             if os.path.exists('data/{}-{}.txt'.format(instrument, metric)):
                 # read the metrics
@@ -122,13 +122,13 @@ if __name__ == '__main__':
                 qcc = QcClassifier()
                 qcc.fit(X_train, y_train)
 
-                predictions.append((metric, y_test, qcc.predict_proba(X_test)[:, 1]))
+                predictions_proba.append((metric, y_test, qcc.predict_proba(X_test)[:, 1]))
 
         # plot ROC curves for all metric types
         plt.figure()
 
         metric_labels = {'idfree': 'ID-free', 'idbased': 'ID-based', 'instrument': 'Instrument'}
-        for metric, y_true, y_score in predictions:
+        for metric, y_true, y_score in predictions_proba:
             # compute ROC
             fpr, tpr, _ = roc_curve(y_true, y_score)
             auc = roc_auc_score(y_true, y_score)
@@ -149,24 +149,4 @@ if __name__ == '__main__':
         plt.legend(loc='lower right')
 
         plt.savefig('{}-roc.pdf'.format(instrument))
-        plt.close()
-
-        ##########
-
-        # ensemble classifier
-
-        avg = np.average([pred[2] for pred in predictions], axis=0)
-        predictions.append(('Ensemble', predictions[0][1], avg))
-
-        plt.figure()
-
-        labels = [metric_labels.get(metric, metric) for metric, _, _ in predictions]
-        sns.barplot(x=labels, y=[average_precision_score(y_true, y_score) for metric, y_true, y_score in predictions])
-
-        plt.ylim(0.9, 1)
-
-        plt.xlabel('Metrics type')
-        plt.ylabel('Average precision')
-
-        plt.savefig('{}-ensemble.pdf'.format(instrument))
         plt.close()
