@@ -1,6 +1,8 @@
 Evaluation of computational QC tools for mass spectrometry proteomics
 =====================================================================
 
+![QC evaluation](qc_evaluation.png)
+
 For more information:
 
 * [Official code website](https://bitbucket.org/proteinspector/qc-evaluation/)
