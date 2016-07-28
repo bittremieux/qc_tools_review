@@ -1,20 +1,17 @@
 import os
 
+import matplotlib as mpl
+mpl.use('Agg')
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sns
 from sklearn.cross_validation import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.metrics import roc_curve, roc_auc_score
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import RobustScaler, StandardScaler
-
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-
-sns.set_context('paper')
-sns.set_style('white')
 
 
 class QcClassifier:
@@ -125,6 +122,9 @@ if __name__ == '__main__':
                 predictions_proba.append((metric, y_test, qcc.predict_proba(X_test)[:, 1]))
 
         # plot ROC curves for all metric types
+        sns.set_context('paper')
+        sns.set_style('white')
+        
         plt.figure()
 
         metric_labels = {'idfree': 'ID-free', 'idbased': 'ID-based', 'instrument': 'Instrument'}
